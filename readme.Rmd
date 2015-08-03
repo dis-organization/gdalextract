@@ -1,0 +1,37 @@
+---
+title: "tiled GDAL extract"
+author: "Michael Sumner"
+date: "03/08/2015"
+output: html_document
+---
+
+Two inbuilt data files were created. 
+
+```{r, eval= FALSE}
+library(raster)
+
+r <- raster(ncol = 32768, nrow = 21600)
+r[] <- seq(ncell(r))
+
+writeRaster(r, "extdata/tiled.tif", options = c("TILED=YES", "COMPRESS=NONE"))
+writeRaster(r, "extdata/notile.tif", options = c("TILED=NO", "COMPRESS=NONE"))
+
+writeRaster(r, "extdata/lzwtiled.tif", options = c("TILED=YES", "COMPRESS=LZW"))
+writeRaster(r, "extdata/lzwnotile.tif", options = c("TILED=NO", "COMPRESS=LZW"))
+
+```
+
+```{r}
+library(raster)
+x <- cbind(runif(10000), runif(10000))
+tiled <- raster("extdata/tiled.tif")
+notile <- raster("extdata/notile.tif")
+
+system.time(extract(tiled, x))
+system.time(extract(notile, x))
+
+cll <- cellFromXY(tiled, x)
+
+system.time(v1 <- rcg(tiled, cll, 1))
+system.time(v2 <- rcg(notile, cll, 1))
+```
